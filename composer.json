@@ -1,0 +1,23 @@
+{
+    "name": "eaglewatch/search_engines",
+    "autoload": {
+        "files": [
+            "helpers/helper.php"
+        ],
+        "psr-4": {
+            "Eaglewatch\\SearchEngines\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Balogun Abdulquddus",
+            "email": "babusunnah@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.4",
+        "guzzlehttp/guzzle": "^7.0.1",
+        "pipl/piplapis-php": "^5.2"
+    }
+}
