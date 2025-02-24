@@ -1,5 +1,6 @@
 {
     "name": "eaglewatch/search_engines",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Eaglewatch\\SearchEngines\\": "src/"
