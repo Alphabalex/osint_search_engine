@@ -6,13 +6,14 @@ use Exception;
 
 class Bing
 {
-    private $api_key;
-    private $api_url;
-
-    public function __construct()
+    private $api_key, $api_url;
+    private $defaultConfig = array("api_url" => "https://api.bing.microsoft.com/v7.0/");
+    private $options = array();
+    public function __construct(string $api_key, array $options = [])
     {
-        $this->api_key = config('bing.api_key');
-        $this->api_url = config('bing.api_url');
+        $this->options = array_merge($this->defaultConfig, $options);
+        $this->api_key = $api_key;
+        $this->api_url = $this->options['api_url'];
     }
 
     function search($query)

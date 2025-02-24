@@ -7,14 +7,17 @@ use GuzzleHttp\Client;
 class OpenCorporate
 {
     private Client $client;
+    private $defaultConfig = array("api_url" => "https://api.opencorporates.com/v0.4/");
+    private $options = array();
 
-    public function __construct()
+    public function __construct(string $api_key, array $options = [])
     {
+        $this->options = array_merge($this->defaultConfig, $options);
         $this->client = new Client([
-            'base_uri' => config('opencorporate.api_url'),
+            'base_uri' => $this->options['api_url'],
             'headers' => [
                 'accept' => 'application/json',
-                'api_token' => config('opencorporate.api_key')
+                'api_token' => $api_key
             ],
         ]);
     }

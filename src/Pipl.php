@@ -9,10 +9,10 @@ use PiplApi_SearchAPIRequest;
 class Pipl
 {
     private $config;
-    public function __construct()
+    public function __construct(string $api_key)
     {
         $configuration = new PiplApi_SearchRequestConfiguration();
-        $configuration->api_key = config('pipl.api_key');
+        $configuration->api_key = $api_key;
         $configuration->minimum_probability = 0.9;
         $configuration->minimum_match = 0.8;
         $configuration->hide_sponsored = true;
