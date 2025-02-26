@@ -2,6 +2,7 @@
 
 namespace Eaglewatch\SearchEngines;
 
+use Exception;
 use GuzzleHttp\Client;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -19,14 +20,6 @@ class Darkdump
                 'accept' => 'application/json',
             ],
         ]);
-    }
-
-    public function search(string $param): array
-    {
-        $searchParam = urlencode($param);
-        $url = "?q={$searchParam}";
-        $response = $this->client->request('GET', $url);
-        return json_decode($response->getBody()->getContents(), true);
     }
 
     public function cleanText(string $htmlContent): string
@@ -199,7 +192,7 @@ class Darkdump
         });
     }
 
-    public function crawl(string $query, int $amount, bool $useProxy = false, bool $scrapeSites = false, bool $scrapeImages = false, bool $returnData = false)
+    public function search(string $query, int $amount, bool $useProxy = false, bool $scrapeSites = false, bool $scrapeImages = false)
     {
         $headers = ['User-Agent' => 'Mozilla/5.0'];
         $proxyConfig = $useProxy ? ['proxy' => 'socks5h://localhost:9050'] : [];
@@ -212,9 +205,8 @@ class Darkdump
             ]);
             $crawler = new Crawler($response->getBody()->getContents());
             $results = $crawler->filter('#ahmiaResultsPage .result');
-        } catch (\Exception $e) {
-            echo "Error in fetching Ahmia.fi: " . $e->getMessage();
-            return;
+        } catch (Exception $e) {
+            throw new Exception("Error in fetching Ahmia.fi: " . $e->getMessage());
         }
 
         $seenUrls = [];
@@ -273,44 +265,19 @@ class Darkdump
                         'images' => $scrapeImages ? $imageUrls : [],
                     ];
 
-                    if ($returnData) {
-                        $data[] = $siteData;
-                    } else {
-                        echo str_repeat('-', 50) . "\n";
-                        echo ($idx + 1) . ".\n --- [+] Website: " . $title . "\n";
-                        echo "| Information: " . $description . "\n";
-                        echo "| Onion Link: " . $siteUrl . "\n";
-                        echo "| Keywords: " . implode(', ', $siteData['keywords']) . "\n";
-                        echo "\t- Sentiment: Polarity = " . $siteData['sentiment']['polarity'] . ", Subjectivity = " . $siteData['sentiment']['subjectivity'] . "\n";
-                        echo "| Metadata: " . json_encode($siteData['metadata']) . "\n";
-                        echo "| Links Found: " . count($siteData['links']) . "\n";
-                        echo "| Emails Found: " . (empty($siteData['emails']) ? 'No emails found.' : implode(', ', $siteData['emails'])) . "\n";
-                        echo "| Documents Found: " . (empty($siteData['documents']) ? 'No document links found.' : implode(', ', $siteData['documents'])) . "\n";
-
-                        if ($scrapeImages) {
-                            echo $imagesStr;
-                        }
-                    }
-                } catch (\Exception $e) {
-                    echo "Dead onion, skipping...: " . $siteUrl . "\n";
+                    $data[] = $siteData;
+                } catch (Exception $e) {
+                    throw new Exception("Dead onion, skipping...: " . $siteUrl . $e->getMessage());
                 }
             } else {
-                if ($returnData) {
-                    $data[] = [
-                        'title' => $title,
-                        'description' => $description,
-                        'site_url' => $siteUrl,
-                    ];
-                } else {
-                    echo ($idx + 1) . ". --- [+] Website: " . $title . "\n";
-                    echo "\t Information: " . $description . "\n";
-                    echo "| Onion Link: " . $siteUrl . "\n";
-                }
+                $data[] = [
+                    'title' => $title,
+                    'description' => $description,
+                    'site_url' => $siteUrl,
+                ];
             }
         }
 
-        if ($returnData) {
-            return $data;
-        }
+        return $data;
     }
 }
